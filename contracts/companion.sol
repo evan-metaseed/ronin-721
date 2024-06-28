@@ -5,9 +5,9 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "@openzeppelin/contracts/token/ERC721/extensions/ERC721Enumerable.sol";
+import "./ERC721Common.sol";
 
-contract Companion is Ownable, ERC721Enumerable, ReentrancyGuard {
+contract Companion is ERC721Common, ReentrancyGuard, Ownable {
     uint256 public MAX_SUPPLY = 10000;
     uint256 public PRICE = 0.001 ether;
     address public withdrawAddress = 0xB4decde4c94Dc19978713D618BDf8fB6d2df6880;
@@ -17,8 +17,11 @@ contract Companion is Ownable, ERC721Enumerable, ReentrancyGuard {
 
     mapping(address => uint256) public mintsPerWallet;
 
-    constructor(string memory name, string memory symbol)
-        ERC721(name, symbol) Ownable(){} 
+    constructor(
+        string memory name,
+        string memory symbol,
+        string memory baseURI
+    ) ERC721Common(name, symbol, baseURI) {}
 
     event Received(address, uint256);
 
@@ -69,27 +72,6 @@ contract Companion is Ownable, ERC721Enumerable, ReentrancyGuard {
             require(_addresses[i] != address(0), "cannot send to 0 address");
             _safeMint(_addresses[i], totalSupply() + 1);
         }
-    }
-
-    // metadata URI
-    string private _baseTokenURI;
-
-    function setBaseURI(string calldata baseURI) external onlyOwner {
-        _baseTokenURI = baseURI;
-    }
-
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
-    }
-
-    function tokenURI(uint256 _tokenId)
-        public
-        view
-        override
-        returns (string memory)
-    {
-        return
-            string(abi.encodePacked(_baseTokenURI, Strings.toString(_tokenId)));
     }
 
     // public mint
